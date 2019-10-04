@@ -1931,164 +1931,166 @@ from_train_preds=False):
     return df_model_out 
 
 
+def evaluate_classification(*args,**kwargs):
+    raise Exception('Use `evaluate_classification_model` instead of `evaluate_classification`.')
 
-def evaluate_classification(model, history, X_train,X_test,y_train,y_test,report_as_df=True, binary_classes=True,
-                            conf_matrix_classes= ['Decrease','Increase'],
-                            normalize_conf_matrix=True,conf_matrix_figsize=(8,4),save_history=False,
-                            history_filename ='results/keras_history.png', save_conf_matrix_png=False,
-                            conf_mat_filename= 'results/confusion_matrix.png',save_summary=False, 
-                            summary_filename = 'results/model_summary.txt',auto_unique_filenames=True):
+# def evaluate_classification(model, history, X_train,X_test,y_train,y_test,report_as_df=True, binary_classes=True,
+#                             conf_matrix_classes= ['Decrease','Increase'],
+#                             normalize_conf_matrix=True,conf_matrix_figsize=(8,4),save_history=False,
+#                             history_filename ='results/keras_history.png', save_conf_matrix_png=False,
+#                             conf_mat_filename= 'results/confusion_matrix.png',save_summary=False, 
+#                             summary_filename = 'results/model_summary.txt',auto_unique_filenames=True):
 
-    """Evaluates kera's model's performance, plots model's history,displays classification report,
-    and plots a confusion matrix. 
-    conf_matrix_classes are the labels for the matrix. [negative, positive]
-    Returns df of classification report and fig object for  confusion matrix's plot."""
+#     """Evaluates kera's model's performance, plots model's history,displays classification report,
+#     and plots a confusion matrix. 
+#     conf_matrix_classes are the labels for the matrix. [negative, positive]
+#     Returns df of classification report and fig object for  confusion matrix's plot."""
 
-    from sklearn.metrics import roc_auc_score, roc_curve, classification_report,confusion_matrix
-    import bs_ds as bs
-    import functions_combined_BEST as ji
-    from IPython.display import display
-    import pandas as pd
-    import matplotlib as mpl
-    numFmt = '.4f'
-    num_dashes = 30
+#     from sklearn.metrics import roc_auc_score, roc_curve, classification_report,confusion_matrix
+#     import bs_ds as bs
+#     import functions_combined_BEST as ji
+#     from IPython.display import display
+#     import pandas as pd
+#     import matplotlib as mpl
+#     numFmt = '.4f'
+#     num_dashes = 30
 
-    # results_list=[['Metric','Value']]
-    # metric_list = ['accuracy','precision','recall','f1']
-    print('---'*num_dashes)
-    print('\tTRAINING HISTORY:')
-    print('---'*num_dashes)
+#     # results_list=[['Metric','Value']]
+#     # metric_list = ['accuracy','precision','recall','f1']
+#     print('---'*num_dashes)
+#     print('\tTRAINING HISTORY:')
+#     print('---'*num_dashes)
 
-    if auto_unique_filenames:
-        ## Get same time suffix for all files
-        time_suffix = ji.auto_filename_time(fname_friendly=True)
+#     if auto_unique_filenames:
+#         ## Get same time suffix for all files
+#         time_suffix = ji.auto_filename_time(fname_friendly=True)
 
-        filename_dict= {'history':history_filename,'conf_mat':conf_mat_filename,'summary':summary_filename}
-        ## update filenames 
-        for filetype,filename in filename_dict.items():
-            if '.' in filename:
-                filename_dict[filetype] = filename.split('.')[0]+time_suffix + '.'+filename.split('.')[-1]
-            else:
-                if filetype =='summary':
-                    ext='.txt'
-                else:
-                    ext='.png'
-                filename_dict[filetype] = filename+time_suffix + ext
-
-
-        history_filename = filename_dict['history']
-        conf_mat_filename = filename_dict['conf_mat']
-        summary_filename = filename_dict['summary']
+#         filename_dict= {'history':history_filename,'conf_mat':conf_mat_filename,'summary':summary_filename}
+#         ## update filenames 
+#         for filetype,filename in filename_dict.items():
+#             if '.' in filename:
+#                 filename_dict[filetype] = filename.split('.')[0]+time_suffix + '.'+filename.split('.')[-1]
+#             else:
+#                 if filetype =='summary':
+#                     ext='.txt'
+#                 else:
+#                     ext='.png'
+#                 filename_dict[filetype] = filename+time_suffix + ext
 
 
-    ## PLOT HISTORY
-    ji.plot_keras_history( history,filename_base=history_filename, save_fig=save_history,title_text='')
-
-    print('\n')
-    print('---'*num_dashes)
-    print('\tEVALUATE MODEL:')
-    print('---'*num_dashes)
-
-    print('\n- Evaluating Training Data:')
-    loss_train, accuracy_train = model.evaluate(X_train, y_train, verbose=True)
-    print(f'    - Accuracy:{accuracy_train:{numFmt}}')
-    print(f'    - Loss:{loss_train:{numFmt}}')
-
-    print('\n- Evaluating Test Data:')
-    loss_test, accuracy_test = model.evaluate(X_test, y_test, verbose=True)
-    print(f'    - Accuracy:{accuracy_test:{numFmt}}')
-    print(f'    - Loss:{loss_test:{numFmt}}\n')
+#         history_filename = filename_dict['history']
+#         conf_mat_filename = filename_dict['conf_mat']
+#         summary_filename = filename_dict['summary']
 
 
-    ## Get model predictions
+#     ## PLOT HISTORY
+#     ji.plot_keras_history( history,filename_base=history_filename, save_fig=save_history,title_text='')
+
+#     print('\n')
+#     print('---'*num_dashes)
+#     print('\tEVALUATE MODEL:')
+#     print('---'*num_dashes)
+
+#     print('\n- Evaluating Training Data:')
+#     loss_train, accuracy_train = model.evaluate(X_train, y_train, verbose=True)
+#     print(f'    - Accuracy:{accuracy_train:{numFmt}}')
+#     print(f'    - Loss:{loss_train:{numFmt}}')
+
+#     print('\n- Evaluating Test Data:')
+#     loss_test, accuracy_test = model.evaluate(X_test, y_test, verbose=True)
+#     print(f'    - Accuracy:{accuracy_test:{numFmt}}')
+#     print(f'    - Loss:{loss_test:{numFmt}}\n')
+
+
+#     ## Get model predictions
     
-    if hasattr(model, 'predict_classes'):
-        y_hat_train = model.predict_classes(X_train)
-        y_hat_test = model.predict_classes(X_test)
-    elif hasattr(model,'predict'):
-        y_hat_train = model.predict(X_train)
-        y_hat_test = model.predict(X_test)
-    else:
-        raise Exception('model has neither "predict" nor "predict_classes" methods')
+#     if hasattr(model, 'predict_classes'):
+#         y_hat_train = model.predict_classes(X_train)
+#         y_hat_test = model.predict_classes(X_test)
+#     elif hasattr(model,'predict'):
+#         y_hat_train = model.predict(X_train)
+#         y_hat_test = model.predict(X_test)
+#     else:
+#         raise Exception('model has neither "predict" nor "predict_classes" methods')
 
-    if y_test.ndim>1 or y_hat_test.ndim>1 or binary_classes==False:
-        if binary_classes==False: 
-            pass
-        else:
-            binary_classes = False
-            print(f"[!] y_test was >1 dim, setting binary_classes to False")
+#     if y_test.ndim>1 or y_hat_test.ndim>1 or binary_classes==False:
+#         if binary_classes==False: 
+#             pass
+#         else:
+#             binary_classes = False
+#             print(f"[!] y_test was >1 dim, setting binary_classes to False")
 
-        ## reduce dimensions of y_train and y_test
-        # y_train = y_train.argmax(axis=1)
-        # y_test = y_test.argmax(axis=1)
-        if y_test.ndim>1:            
-            y_test = y_test.argmax(axis=1)
-        if y_hat_test.ndim>1:
-            y_hat_test = y_hat_test.argmax(axis=1)
-        # for var in ['y_test', 'y_hat_test', 'y_train', 'y_hat_train']:
-        #     real_var = eval(var)
-        #     print('real_var shape:',real_var.shape)
-        #     if real_var.ndim>1:
-        #         ## reduce dimensions
-        #         cmd =  var+'= real_var.argmax(axis=1)'
-        #         # eval(cmd)
-        #         eval(var+'=') real_var.argymax(axis=1)
-        #         # exec(cmd)
-        #         cmd =f'print("argmax shape:",{var}.shape)' 
-        #         eval(cmd)
-        #         # exec(cmd)
+#         ## reduce dimensions of y_train and y_test
+#         # y_train = y_train.argmax(axis=1)
+#         # y_test = y_test.argmax(axis=1)
+#         if y_test.ndim>1:            
+#             y_test = y_test.argmax(axis=1)
+#         if y_hat_test.ndim>1:
+#             y_hat_test = y_hat_test.argmax(axis=1)
+#         # for var in ['y_test', 'y_hat_test', 'y_train', 'y_hat_train']:
+#         #     real_var = eval(var)
+#         #     print('real_var shape:',real_var.shape)
+#         #     if real_var.ndim>1:
+#         #         ## reduce dimensions
+#         #         cmd =  var+'= real_var.argmax(axis=1)'
+#         #         # eval(cmd)
+#         #         eval(var+'=') real_var.argymax(axis=1)
+#         #         # exec(cmd)
+#         #         cmd =f'print("argmax shape:",{var}.shape)' 
+#         #         eval(cmd)
+#         #         # exec(cmd)
         
         
         
 
-    print('---'*num_dashes)
-    print('\tCLASSIFICATION REPORT:')
-    print('---'*num_dashes)
+#     print('---'*num_dashes)
+#     print('\tCLASSIFICATION REPORT:')
+#     print('---'*num_dashes)
 
-    # get both versions of classification report output
-    report_str = classification_report(y_test,y_hat_test)
-    report_dict = classification_report(y_test,y_hat_test,output_dict=True)
-    if report_as_df:
-        try:
-            ## Create and display classification report
-            # df_report =pd.DataFrame.from_dict(report_dict,orient='columns')#'index')#class_rows,orient='index')
-            df_report_temp = pd.DataFrame(report_dict)
-            df_report_temp = df_report_temp.T#reset_index(inplace=True)
+#     # get both versions of classification report output
+#     report_str = classification_report(y_test,y_hat_test)
+#     report_dict = classification_report(y_test,y_hat_test,output_dict=True)
+#     if report_as_df:
+#         try:
+#             ## Create and display classification report
+#             # df_report =pd.DataFrame.from_dict(report_dict,orient='columns')#'index')#class_rows,orient='index')
+#             df_report_temp = pd.DataFrame(report_dict)
+#             df_report_temp = df_report_temp.T#reset_index(inplace=True)
 
-            df_report = df_report_temp[['precision','recall','f1-score','support']]
-            display(df_report.round(4).style.set_caption('Classification Report'))
-            print('\n')
+#             df_report = df_report_temp[['precision','recall','f1-score','support']]
+#             display(df_report.round(4).style.set_caption('Classification Report'))
+#             print('\n')
         
-        except:
-            print(report_str)
-            # print(report_dict)
-            df_report = pd.DataFrame()
-    else:
-        print(report_str)
+#         except:
+#             print(report_str)
+#             # print(report_dict)
+#             df_report = pd.DataFrame()
+#     else:
+#         print(report_str)
 
-    if save_summary:
-        with open(summary_filename,'w') as f:
-            model.summary(print_fn=lambda x: f.write(x+"\n"))
-            f.write(f"\nSaved at {time_suffix}\n")
-            f.write(report_str)
+#     if save_summary:
+#         with open(summary_filename,'w') as f:
+#             model.summary(print_fn=lambda x: f.write(x+"\n"))
+#             f.write(f"\nSaved at {time_suffix}\n")
+#             f.write(report_str)
 
-    ## Create and plot confusion_matrix
-    conf_mat = confusion_matrix(y_test, y_hat_test)
-    mpl.rcParams['figure.figsize'] = conf_matrix_figsize
-    fig = plot_confusion_matrix(conf_mat,classes=conf_matrix_classes,
-                                   normalize=normalize_conf_matrix, fig_size=conf_matrix_figsize)
-    if save_conf_matrix_png:
-        fig.savefig(conf_mat_filename,facecolor='white', format='png', frameon=True)
+#     ## Create and plot confusion_matrix
+#     conf_mat = confusion_matrix(y_test, y_hat_test)
+#     mpl.rcParams['figure.figsize'] = conf_matrix_figsize
+#     fig = plot_confusion_matrix(conf_mat,classes=conf_matrix_classes,
+#                                    normalize=normalize_conf_matrix, fig_size=conf_matrix_figsize)
+#     if save_conf_matrix_png:
+#         fig.savefig(conf_mat_filename,facecolor='white', format='png', frameon=True)
 
-    if report_as_df:
-        return df_report, fig
-    else:
-        return report_str,fig
+#     if report_as_df:
+#         return df_report, fig
+#     else:
+#         return report_str,fig
 
 
 
 def evaluate_classification_model(model,  X_train,X_test,y_train,y_test, history=None,binary_classes=True,
-                            conf_matrix_classes= ['Decrease','Increase'],
+                            conf_matrix_classes= ['Decrease','Increase'], plot_training_conf_mat = False,
                             normalize_conf_matrix=True,conf_matrix_figsize=(8,4),save_history=False,
                             history_filename ='results/keras_history.png', save_conf_matrix_png=False,
                             conf_mat_filename= 'results/confusion_matrix.png',save_summary=False,
@@ -2144,42 +2146,77 @@ def evaluate_classification_model(model,  X_train,X_test,y_train,y_test, history
     print('---'*num_dashes)
     print('\tEVALUATE MODEL:')
     print('---'*num_dashes)
+    
+    ## Show model.evaluate for training and test data
+    if hasattr(model,'evaluate'):
 
-    print('\n- Evaluating Training Data:')
-    loss_train, accuracy_train = model.evaluate(X_train, y_train, verbose=True)
-    print(f'    - Accuracy:{accuracy_train:{numFmt}}')
-    print(f'    - Loss:{loss_train:{numFmt}}')
+        print('\n- Evaluating Training Data:')
+        loss_train, accuracy_train = model.evaluate(X_train, y_train, verbose=True)
+        print(f'    - Accuracy:{accuracy_train:{numFmt}}')
+        print(f'    - Loss:{loss_train:{numFmt}}')
 
-    print('\n- Evaluating Test Data:')
-    loss_test, accuracy_test = model.evaluate(X_test, y_test, verbose=True)
-    print(f'    - Accuracy:{accuracy_test:{numFmt}}')
-    print(f'    - Loss:{loss_test:{numFmt}}\n')
+        print('\n- Evaluating Test Data:')
+        loss_test, accuracy_test = model.evaluate(X_test, y_test, verbose=True)
+        print(f'    - Accuracy:{accuracy_test:{numFmt}}')
+        print(f'    - Loss:{loss_test:{numFmt}}\n')
+
+    
+     
 
 
-    ## Get model predictions
-    y_hat_train = model.predict_classes(X_train)
-    y_hat_test = model.predict_classes(X_test)
 
-    if y_test.ndim>1 or binary_classes==False:
-        if binary_classes==False: 
-            pass
-        else:
-            binary_classes = False
-            print(f"[!] y_test was >1 dim, setting binary_classes to False")
+    ## Get predictions from model
+    if hasattr(model,'predict_classes'):
+        ## Get model predictions
+        y_hat_train = model.predict_classes(X_train)
+        y_hat_test = model.predict_classes(X_test)
+    elif hasattr(model,'predict'):
+        y_hat_train = model.predict(X_train)
+        y_hat_test = model.predict(X_test)
+    else: 
+        raise Exception('Model does not have .predict_classes or .predict methods')
+    
+    
+    
         
-        ## reduce dimensions of y_train and y_test
-        y_train = y_train.argmax(axis=1)
+    ## Flatten any multi-column keras targets
+    if y_test.ndim>1:
         y_test = y_test.argmax(axis=1)
 
+    if y_train.ndim>1:
+        y_train =y_train.argmax(axis=1)        
+        
+    if y_hat_test.ndim>1:
+        y_hat_test = y_hat_test.argmax(axis=1)
 
+    if y_hat_train.ndim>1:
+        y_hat_train =y_hat_train.argmax(axis=1)            
+        # or y_train.ndim>1:#binary_classes==False:
+        # if binary_classes==False: 
+        #     pass
+        
+        ## reduce dimensions of y_train and y_test
+        # y_train = y_train.argmax(axis=1)
+        
+        # if binary_classes == True:
+        #     binary_classes = False
+        #     print(f"[!] y_test was >1 dim, setting binary_classes to False")
+            
+        
+        
     print('---'*num_dashes)
     print('\tCLASSIFICATION REPORT:')
     print('---'*num_dashes)
 
-    ## Get sklearn classification report 
-    report_str = classification_report(y_test,y_hat_test)
-    report_dict = classification_report(y_test,y_hat_test,output_dict=True)
-    
+    try:
+        ## Get sklearn classification report 
+        report_str = classification_report(y_test,y_hat_test)
+        report_dict = classification_report(y_test,y_hat_test,output_dict=True)
+    except:
+        print('y_test:',y_test.shape)
+        print('y_hat_test:',y_hat_test.shape)
+        print('y_train:',y_train.shape)
+        print('y_hat_train:',y_hat_train.shape)
     
     try:
         ## Create and display classification report
@@ -2203,14 +2240,24 @@ def evaluate_classification_model(model,  X_train,X_test,y_train,y_test, history
             f.write(f"\nSaved at {time_suffix}\n")
             f.write(report_str)
 
-    ## Create and plot confusion_matrix
-    import matplotlib.pyplot as plt
-    conf_mat = confusion_matrix(y_test, y_hat_test)
-    with plt.rc_context(rc={'figure.figsize':conf_matrix_figsize}): # rcParams['figure.figsize']
-        fig = plot_confusion_matrix(conf_mat,classes=conf_matrix_classes,
-                                    normalize=normalize_conf_matrix, fig_size=conf_matrix_figsize)
-    if save_conf_matrix_png:
-        fig.savefig(conf_mat_filename,facecolor='white', format='png', frameon=True)
+    def get_and_plot_conf_mat(y_true, y_pred,title='Confusion Matrix',save_png = save_conf_matrix_png):#, save_conf_matrix_png=save_conf_matrix_png,
+                            #   conf_mat_filename=conf_mat_filename, normalize_conf_matrix=):
+        ## Create and plot confusion_matrix
+        import matplotlib.pyplot as plt
+        conf_mat = confusion_matrix(y_true, y_pred)
+        with plt.rc_context(rc={'figure.figsize':conf_matrix_figsize}): # rcParams['figure.figsize']
+            fig = plot_confusion_matrix(conf_mat,classes=conf_matrix_classes, title=title,
+                                        normalize=normalize_conf_matrix, fig_size=conf_matrix_figsize)
+        if save_png:
+            fig.savefig(conf_mat_filename,facecolor='white', format='png', frameon=True)
+            
+        fig.show()
+        return fig
+            
+    fig = get_and_plot_conf_mat(y_test,y_hat_test,title='Confusion Matrix: Test Data')    
+        
+    if plot_training_conf_mat:
+        fig_cm_train = get_and_plot_conf_mat(y_train,y_hat_train,save_png=False,title='Confusion Matrix: Training Data')    
 
     return df_report, fig
 
@@ -2463,41 +2510,516 @@ true_test_series,include_train_data=True,return_preds_df = False, save_history=F
 
    
 
-def my_custom_scorer(y_true,y_pred, model=None, **kwargs):
+def my_custom_scorer(y_true,y_pred, model=None,method='sum', **kwargs):
     """My custom score function to use with sklearn's GridSearchCV
-    Maximizes the average accuracy per class using a normalized confusion matrix"""
-    from sklearn.metrics import make_scorer,confusion_matrix
+    - Method may be 'mean' or 'sum'
+    
+    - Maximizes the average accuracy per class using a normalized confusion matrix
+    [i] Note: To use my_custom_scorer in GridSearch:
+    >> from sklearn.metrics import make_scorer
+    >> grid = GridSearch(estimator, parameter_grid)
+    """
+    from sklearn.metrics import make_scorer,confusion_matrix#, acc
     import numpy as np
     import functions_combined_BEST as ji    
+
+    # set labels for confusion matrix
+    labels = ['Decrease','No Change', 'Increase']
+
     
-    # set labels if provided
-    if 'labels' in kwargs:
-        labels = kwargs['labels']
-    else:
-        labels=np.unique(y_true)
-    
+    ## If y_true is a multi-column one-hotted target
     if y_true.ndim>1 or y_pred.ndim>1:
-    
+
         ## reduce dimensions of y_train and y_test
         if y_true.ndim>1:            
             y_true = y_true.argmax(axis=1)
+            
         if y_pred.ndim>1:
             y_pred = y_pred.argmax(axis=1)
-            
-    # Get confusion matrx
+
+    
+    ## Get confusion matrx
     cm = confusion_matrix(y_true, y_pred)
-    
-    # Normalize confusion matrix
+
+    ## Normalize confusion matrix
     cm_norm = cm.astype('float')/cm.sum(axis=1)[:,np.newaxis]
-    
+
     ## Get diagonals for class accuracy
     diag = cm_norm.diagonal()
-    score = np.mean(diag)
-    print(f'Mean Class Accuracy = {score}')
+    
+    print('\n')
+    ## Choose Score Method
+    if 'mean' in method:
+        score = np.mean(diag)
+        print(f'Mean Class Accuracy = {score}')
+
+        
+    elif 'sum' in method:
+        score = np.sum(diag)
+        print(f'Summed Class Accuracy = {score}')    
+    
+    ## Display results for user
+    print('')
     print(f'Class Accuracy Values:')
     print(diag)    
-    
-    
-    ji.plot_confusion_matrix(cm,normalize=True)
-    
+
+    ## Plot confusion matrix
+    ji.plot_confusion_matrix(cm,normalize=True,classes=labels);
+
     return score
+
+
+# # Create HyperParaemeter Space
+# params_to_search ={'filter_size':[2,4,6],
+#                    'activation':['relu','tanh','linear'],
+#                    'n_filters':[100,200],#,300,400],
+#                   'dropout':[0.2,0.4],
+#                   'optimizer':['adam','rmsprop','adadelta'],
+#                 'epochs':[10]}
+
+# def fit_gridsearch(build_fn,parameter_grid,X_train,y_train,score_fn=None,verbose=1,send_email=False):
+#     """Builds a Keras model from build_fn, then wraps it in KerasClassifier 
+#     for use with sklearn's GridSearchCV. Can score GridSearch with built-in 
+#     metric from sklearn, or can pass a custom functions to be used with make_scorer().
+#     Upon completion, emails best parameters to gmail account. 
+    
+#     Args:
+#         build_fn (func): Build function for model with parameters to tune as arguments.
+#         parameter_grid (dict): Dict of build_fn parameters (keys) and lists of parameters (values)
+#         X_train, y_train (numpy array): training dataset
+#         score_fn (func or str): Scoring function to use with GridSearchCV. 
+#             - For builtin sklearn metrics, pass their name as a string.
+#                 - https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
+#             - For custom function, pass function itself. Function must accept, y_true,y_pred
+#                 and must return a value to maximize. 
+#             - Default(None)=ji.my_custom_scorer().
+            
+#     Returns:
+#         model: (KerasClassifier) The return value. True for success, False otherwise.
+#         results
+#     """
+#     from keras.wrappers.scikit_learn import KerasClassifier#, KerasRegressor
+#     from sklearn.model_selection import GridSearchCV
+#     from sklearn.metrics import make_scorer
+#     import pandas as pd
+    
+#     import functions_combined_BEST as ji
+#     import bs_ds as bs
+    
+
+#     ## Wrap create_model with KerasClassifier
+#     neural_network = KerasClassifier(build_fn=build_fn,verbose=verbose)
+    
+    
+#     ## Run GridSearch
+#     import types
+#     if score_fn is None:
+#         score_func = make_scorer(ji.my_custom_scorer)
+#     elif isinstance(score_fn, types.FunctionType):
+#         score_func = make_scorer(score_fn)
+#     elif isinstance(score_fn, str):
+#         score_func =  score_fn
+        
+
+#     grid = GridSearchCV(estimator=neural_network,param_grid=parameter_grid, 
+#                         scoring=score_func)
+
+#     ## Start Timer
+#     tune_clock = bs.Clock()
+#     tune_clock.tic()
+    
+#     ## Fit GridSearch
+#     grid_result = grid.fit(X_train, y_train)
+#     tune_clock.toc()
+
+#     ## Print Best Params
+#     best_params = grid_result.best_params_
+#     print(best_params)
+
+#     if send_email:
+#         ## Send Email with completion time and best parameters found. 
+#         time_completed = pd.datetime.now()
+#         fmt = '%m/%d%Y-%T'
+#         msg = f"GridSearch Completed at {time_completed.strftime(fmt)}\n GridSearchResults:\n{best_params}"
+#         email_notification(msg=msg)
+    
+#     return grid_result
+
+
+class EncryptedPassword():
+    """Class that can be used to either provide a password to be encrypted or load an encypted password from file.
+    The string representations of the unencrypted password are shielded from displaying, when possible. 
+    
+    - If encrypting a password, a key file and a password file will be saved to disk. 
+        - Default Key Filename: '..\\encryption_key.bin',
+        - Default Password Filename: '..\\encrypted_pwd.bin'
+    - If opening and decrypting key and password files, pass filenames during initialization. 
+    
+    
+    Example Usage:
+    >> # To Encrypt, with default folders:
+    >> my_pwd EncryptedPassword('my_password')
+    
+    >> # To Encrypt With custom folders
+    >> my_pwd = EncryptedPassword('my_password',filename_for_key='..\folder_outside_repo\key.bin',
+                                    filename_for_password = '..\folder_outside_repo\key.bin')
+                                    
+                                    
+    >> # To open and decrypt files (from default folders):
+    >> my_pwd = EncryptedPassword(from_file=True)
+    
+    >> # To open and decrypt files (from custom folders):
+    >> my_pwd = EncryptedPassword(from_file=True, 
+                                filename_for_key='..\folder_outside_repo\key.bin',
+                                filename_for_password = '..\folder_outside_repo\key.bin')
+                                    
+        
+    """
+    username = 'NOT PROVIDED'
+    
+    @property
+    def password(self):
+        if hasattr(self,'_encrypted_password_'):
+            print('Encrypted Password:')
+            return self._encrypted_password_
+        else:
+            raise Exception('Password not yet encrypted.')
+            
+    @password.setter
+    def password(self,password):
+        raise Exception('.password is read only.')
+        
+           
+    def __init__(self,username=None,password=None,from_file=False, encrypt=True,
+                 load_filenames_from_txt_file=None,
+                filename_for_key='..\\encryption_key.bin',
+                filename_for_password='..\\encrypted_pwd.bin',
+                filename_for_username = '..\\encrypted_username.bin'):
+        
+        if load_filenames_from_txt_file is None:
+            self.filename_for_key = filename_for_key
+            self.filename_for_password = filename_for_password
+            self.filename_for_username = filename_for_username
+        else:
+            print(f'Overriding input filenames for those saved in {load_filenames_from_txt_file}')
+            self.load_filenames_from_txt()
+        
+        if username is not None:
+            self.username = username
+        
+        if (password is None):
+            if (from_file==True):
+                try:
+                    self.load_from_file(key_filename=filename_for_key,
+                                    password_filename=filename_for_password,
+                                        username_filename=filename_for_username)
+                except:
+                    raise Exception('Something went wrong. Do the key and password files exist?')
+                
+            else:
+                raise Exception('Must either provide a password to encrypt, or set from_file=True')
+            
+        else:
+#             _password_
+            self._password_ = password
+            if encrypt:
+                self.encrypt_password()
+                
+    def __repr__(self):
+        password = self._password_
+        msg = f'[i] Password is {len(password)} chars long.'
+        return msg
+
+    def __str__(self):
+        password = self._password_
+        msg = f'[i] Password is {len(password)} chars long.'
+        return msg        
+
+    
+    def _get_password(self):
+        return self._password_
+    
+    def load_filenames_from_txt(self,filename_file='password_filenames.txt'):
+        with open(filename_file,'r') as file:
+            filenames = file.read()
+            
+        self.filename_for_key= filenames[0]
+        self.filename_for_username= filenames[1]
+        self.filename_for_password= filenames[2]
+        print(f'Filenames loaded and saved from {filename_file}')
+            
+    
+    def save_filenames_to_txt(self,filename_file='encrypted_password_filenames.txt'):
+        with open(filename_file,'w') as file:
+            file.write(self.filename_for_key)
+            file.write(self.filename_for_username)
+            file.write(self.filename_for_password)
+        print(f'Key/Password/Username filepaths saved to {filename_file}')
+            
+    
+    def load_from_file(self,key_filename,password_filename,
+                      username_filename):
+    
+        from cryptography.fernet import Fernet
+        ## Load Key
+        with open(key_filename,'rb') as file:
+            for line in file:
+                key = line
+
+
+        cipher_suite = Fernet(key)
+        self._cipher_suite_ = cipher_suite
+
+        ## Load password
+        with open(password_filename,'rb') as file:
+            for line in file:
+                encryptedpwd = line
+        self._encrypted_password_ = encryptedpwd
+        
+        ## Decrypt password
+        unciphered_text = (cipher_suite.decrypt(encryptedpwd))
+        plain_text_encrypted_password = bytes(unciphered_text).decode('utf-8')
+        self._password_ = plain_text_encrypted_password
+        
+        ## Load username
+        with open(username_filename,'rb') as file:
+            for line in file:
+                username = line
+        self.username = username
+        
+    
+    
+    def encrypt_password(self, show_encrypted_password=False):
+     
+        filename_for_key= self.filename_for_key
+        filename_for_password=self.filename_for_password
+        filename_for_username = self.filename_for_username
+
+        ## Import cryptography and generate encryption key
+        from cryptography.fernet import Fernet
+        key = Fernet.generate_key()
+        self._key_ = key
+
+        ## Create the cipher_suit for encrypting/decrypting
+        cipher_suite = Fernet(key)
+        self._cipher_suite_ = cipher_suite
+ 
+        
+        ## Encrypt password
+        password = self._password_
+        text_to_encrypt = bytes(password,'utf-8')
+        ciphered_text = cipher_suite.encrypt(text_to_encrypt)#password goes here
+        self._encrypted_password_ = bytes(ciphered_text).decode('utf-8')
+        
+        if show_encrypted_password:
+            print('Encrypyted Password:')
+            print(self._encrypted_password_)
+        
+        
+        ## Encrypt username
+        username = self.username
+        username_to_encrypt = bytes(username,'utf-8')
+        ciphered_username = cipher_suite.encrypt(username_to_encrypt)
+        self._encrypted_username_ = bytes(ciphered_username).decode('utf-8')
+        
+
+        ## Test decryption
+        unciphered_text = cipher_suite.decrypt(ciphered_text)
+        unciphered_username = cipher_suite.decrypt(ciphered_username)
+        password_decoded = unciphered_text.decode('utf-8')
+        username_decoded = unciphered_username.decode('utf-8')
+        
+        check_pwd = password_decoded==password
+        check_user = username_decoded==username
+                    
+        if  check_pwd &check_user:
+            self._password_ = password_decoded 
+            print('[!] Make sure to delete typed password above from class instantiation.')
+        else:
+            raise Exception('Decrypted password and input password/username do not match. Something went wrong.')
+
+        ## Specify binary files (outside of repo) for storing key and password files
+        with open(filename_for_key,'wb') as file:
+            file.write(key)
+
+        with open(filename_for_password,'wb') as file:
+            file.write(ciphered_text)
+            
+        with open(filename_for_username,'wb') as file:
+            file.write(ciphered_username)
+
+        print(f'[io] Encryption Key saved as {filename_for_key}')
+        print(f'[io] Encrypted Password saved as {filename_for_password}')
+        print(f'[io] Encrypted Username saved as {filename_for_username}')
+        
+        
+        
+def email_notification(password_obj=None,subject='GridSearch Finished',msg='The GridSearch is now complete.'):
+    """Sends email notification from gmail account using prevouisly encrypyter password.
+    Args:
+        password_obj (EncryptedPassword object): EncryptedPassword object with username/password.
+        subject (str):Text for subject line.
+        msg (str): Text for body of email. 
+
+    Returns:
+        bool: The return value. True for success, False otherwise.
+
+    Loads encrypted key and password from previously exported cipher from cryptography.fernet"""
+    if password_obj is None:
+        print('Must pass an EncrypytedPassword object.')
+        print('>> pwd_obj = EncryptedPassword(username="my_username",password="my_password")')
+        print('>> send_email(encrypted_password_obj=pwd_obj)')
+        raise Exception('Must pass an EncryptedPassword.')
+    
+    import smtplib
+    from email.message import EmailMessage
+    from email.headerregistry import Address
+    from email.utils import make_msgid
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    from email.mime.base import MIMEBase
+    from email import encoders
+    
+    
+    
+    gmail_user = password_obj.username
+    gmail_password = password_obj._password_
+    
+    ## WRITE EMAIL
+    message = MIMEMultipart()
+    message['Subject'] =subject
+    message['To'] = gmail_user
+    message['From']=gmail_user
+    body = msg
+    message.attach(MIMEText(body,'plain'))
+    text_message = message.as_string()
+
+
+    # emails end request
+    try:
+        with  smtplib.SMTP_SSL('smtp.gmail.com',465) as server:
+    #         server.ehlo()
+            server.login(gmail_user,gmail_password)
+            server.sendmail(gmail_user,gmail_user, text_message)
+            server.close()
+            print('Email sent!')
+            success=True
+
+        
+    except Exception as e:
+        print(e)
+        print('Something went wrong')
+        success=False
+        
+#     return success
+        
+
+
+## DEFINE FUNCTION FOR FITTING AND EVALUATING SINGLE MODELS (Not GridSearch)
+def fit_and_eval_model(model, X_train, X_test, X_val, y_train, y_test, y_val,
+                      epochs = 10, batch_size=100,plot_conf_mat_train=False, verbose=1,**kwargs):
+    """Fits Kera's model with X_train, y_train data, using (X_val, y_val) for validation_data.
+    - Then evaluates model with training/test data
+    - Plots Keras Training History
+    - Plots Confusion Matrix
+    """
+    import bs_ds as bs
+    import functions_combined_BEST as ji
+    if 'epochs' in kwargs:
+        epochs=kwargs['epochs']
+        
+    if 'batch_size' in kwargs:
+        batch_size=kwargs['batch_size']
+    clock = bs.Clock()
+    clock.tic()
+    dashes = '---'*20
+    print(f"{dashes}\n\tFITTING MODEL:\n{dashes}")
+    
+    
+
+    history = model.fit(X_train, y_train, 
+                          epochs=epochs,
+                          verbose=verbose, 
+                          validation_data=(X_val,y_val),#validation_split=validation_split,
+                          batch_size=batch_size)#,
+    #                       callbacks=callbacks)
+
+    clock.toc()
+
+    df_report,fig=evaluate_classification_model(model=model,
+                                                       X_train=X_train, X_test=X_test,
+                                                       y_train=y_train, y_test=y_test, history=history, 
+                                                       binary_classes=False,
+                                                       plot_training_conf_mat=plot_conf_mat_train,
+                                                       conf_matrix_classes=['Decrease','No Change','Increase'])
+    return model, df_report
+
+
+
+def fit_gridsearch(build_fn,parameter_grid,X_train,y_train,score_fn=None,verbose=1,send_email=False,encrypted_password=None):
+    """Builds a Keras model from build_fn, then wraps it in KerasClassifier 
+    for use with sklearn's GridSearchCV. Can score GridSearch with built-in 
+    metric from sklearn, or can pass a custom functions to be used with make_scorer().
+    Upon completion, emails best parameters to gmail account. 
+    
+    Args:
+        build_fn (func): Build function for model with parameters to tune as arguments.
+        parameter_grid (dict): Dict of build_fn parameters (keys) and lists of parameters (values)
+        X_train, y_train (numpy array): training dataset
+        score_fn (func or str): Scoring function to use with GridSearchCV. 
+            - For builtin sklearn metrics, pass their name as a string.
+                - https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
+            - For custom function, pass function itself. Function must accept, y_true,y_pred
+                and must return a value to maximize. 
+            - Default(None)=ji.my_custom_scorer().
+            
+    Returns:
+        grid_result:The output from the grid.fit.
+    """
+    from keras.wrappers.scikit_learn import KerasClassifier#, KerasRegressor
+    from sklearn.model_selection import GridSearchCV
+    from sklearn.metrics import make_scorer
+    import pandas as pd
+    
+    import functions_combined_BEST as ji
+    import bs_ds as bs
+    
+
+    ## Wrap create_model with KerasClassifier
+    neural_network = KerasClassifier(build_fn=build_fn,verbose=verbose)
+    
+    
+    ## Run GridSearch
+    import types
+    if score_fn is None:
+        score_func = make_scorer(ji.my_custom_scorer)
+    elif isinstance(score_fn, types.FunctionType):
+        score_func = make_scorer(score_fn)
+    elif isinstance(score_fn, str):
+        score_func =  score_fn
+        
+
+    grid = GridSearchCV(estimator=neural_network,param_grid=parameter_grid, 
+                        scoring=score_func)
+
+    ## Start Timer
+    tune_clock = bs.Clock()
+    tune_clock.tic()
+    
+    ## Fit GridSearch
+    grid_result = grid.fit(X_train, y_train)
+    tune_clock.toc()
+
+    ## Print Best Params
+    best_params = grid_result.best_params_
+    print(best_params)
+
+    if send_email:
+        ## Send Email with completion time and best parameters found. 
+        time_completed = pd.datetime.now()
+        fmt = '%m/%d%Y-%T'
+        msg = f"GridSearch Completed at {time_completed.strftime(fmt)}\n GridSearchResults:\n{best_params}"
+        email_notification(password_obj=encrypted_password, msg=msg)
+        
+    
+    return grid_result
